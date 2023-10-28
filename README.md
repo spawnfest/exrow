@@ -54,38 +54,39 @@ A set of operators that perform calculations on bits.
 
 ## TODO
 
-- [ ] Language and parse
-  - [ ] Define the basic language and implement the parse
-    - [x] Numbers
-      - [x] Negative numbers
-    - [x] Operations
-    - [x] Bitwise
-    - [x] Parentheses
-    - [x] Variables
-    - [ ] Units
-      - [ ] Angular
-      - [ ] Area
-      - [ ] CSS
-      - [ ] Currency
-      - [ ] Data
-      - [ ] Date and Time
-      - [x] Length: meter, mil, points, lines, inch, hand, foot, yard, rod, chain, furlong, mile, cable, nautical mile, league
-      - [ ] Scales
-      - [ ] Velocity: km, knot
-      - [ ] Temperature
-      - [ ] Volume
-      - [ ] Weight
-    - [ ] Function call `sum(10, 2) | (sum 10, 2) + 3`
-    - [ ] Percentage
-    - [ ] Formula support
-      - [ ] Starting with =
-    - [ ] Lambda support
-  - [ ] Implement a runtime
-    - [ ] Arithmetic
-    - [ ] Unit conversion
-    - [ ] Variables
-    - [ ] Lambda
-  - [ ] Document the language
+- [ ] Define the basic language and implement the parse
+  - [x] Numbers
+    - [x] Negative numbers
+  - [x] Operations
+  - [x] Bitwise
+  - [x] Parentheses
+  - [x] Variables
+  - [ ] Units
+    - [ ] Angular
+    - [ ] Area
+    - [ ] CSS
+    - [ ] Currency
+    - [ ] Data
+    - [ ] Date and Time
+    - [x] Length: meter, mil, points, lines, inch, hand, foot, yard, rod, chain, furlong, mile, cable, nautical mile, league
+    - [ ] Scales
+    - [ ] Velocity: km, knot
+    - [ ] Temperature
+    - [ ] Volume
+    - [ ] Weight
+  - [ ] Function call `sum(10, 2) | (sum 10, 2) + 3`
+  - [ ] Percentage
+  - [ ] Formula support
+    - [ ] Starting with =
+  - [ ] Lambda support
+  - [ ] Array and matrix
+    - [ ] Matrix operations
+- [ ] Implement a runtime
+  - [ ] Arithmetic
+  - [ ] Unit conversion
+  - [ ] Variables
+  - [ ] Lambda
+- [ ] Document the language
 
 - [ ] Use exrow as a block in livebook?
 
