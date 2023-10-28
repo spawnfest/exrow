@@ -56,10 +56,10 @@ A set of operators that perform calculations on bits.
     - [x] Numbers
     - [x] Operations
     - [x] Bitwise
-    - [ ] Parentheses
+    - [x] Parentheses
+    - [ ] Variables
     - [ ] Units
     - [ ] Percentage
-    - [ ] Variables
   - [ ] Implement the parse for the basic language
   - [ ] Implement a runtime
   - [ ] Document the language
