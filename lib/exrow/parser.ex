@@ -17,7 +17,7 @@ defmodule Exrow.Parser do
       |> reduce({Enum, :join, [""]})
     )
 
-  float_combinator =
+  float_comb =
     ascii_string([?0..?9], min: 1)
     |> concat(optional_separator)
     |> reduce({Enum, :join, [""]})
@@ -26,7 +26,7 @@ defmodule Exrow.Parser do
     |> tag(:float)
     |> post_traverse(:to_number)
 
-  integer_combinator =
+  integer_comb =
     [
       {:binary, ignore(string("0b")), ascii_string([?0..?1], min: 1)},
       {:octal, ignore(string("0o")), ascii_string([?0..?8], min: 1)},
@@ -47,32 +47,36 @@ defmodule Exrow.Parser do
     end)
     |> choice()
 
-  number_combinator = choice([float_combinator, integer_combinator])
+  number_comb = choice([float_comb, integer_comb])
 
-  operator_combinator = [
-    {:in, ["in", "into", "as", "to"]},
-    {:+, ["+", "plus", "and", "with"]},
-    {:-, ["-", "minus", "subtract", "without"]},
-    {:*, ["*", "times", "multiplied by", "mul"]},
-    {:/, ["/", "divide", "divide by"]},
-    {:^, ["^", "pow"]},
-    {:rem, ["rem", "mod"]},
-    {:and, ["&"]},
-    {:or, ["|"]},
-    {:xor, ["xor"]},
-    {:<<<, ["<<"]},
-    {:>>>, [">>"]},
-  ]
-  |> Enum.map(fn {operator, alternatives} ->
-    alts = ["#{operator}" | alternatives] |> Enum.map(&string(&1)) |> choice()
-    number_combinator
-    |> concat(optional(blankspace))
-    |> ignore(alts)
-    |> concat(optional(blankspace))
-    |> concat(number_combinator)
-    |> tag(operator)
-  end)
-  |> choice()
+  operator_comb =
+    [
+      {:in, ["in", "into", "as", "to"]},
+      {:+, ["+", "plus", "and", "with"]},
+      {:-, ["-", "minus", "subtract", "without"]},
+      {:*, ["*", "times", "multiplied by", "mul"]},
+      {:/, ["/", "divide", "divide by"]},
+      {:^, ["^", "pow"]},
+      {:rem, ["rem", "mod"]},
+      {:and, ["&"]},
+      {:or, ["|"]},
+      {:xor, ["xor"]},
+      {:<<<, ["<<"]},
+      {:>>>, [">>"]}
+    ]
+    |> Enum.map(fn {operator, alternatives} ->
+      number_comb
+      |> concat(optional(blankspace))
+      |> ignore(
+        ["#{operator}" | alternatives]
+        |> Enum.map(&string(&1))
+        |> choice()
+      )
+      |> concat(optional(blankspace))
+      |> concat(number_comb)
+      |> tag(operator)
+    end)
+    |> choice()
 
   tempo_filter =
     [
@@ -105,26 +109,34 @@ defmodule Exrow.Parser do
     end)
     |> choice()
 
-  # mathdown_combinator = number_combinator
-  mathdown_combinator = choice([
-    operator_combinator,
-    number_combinator
-  ])
+  # mathdown_comb = number_comb
+  mathdown_comb =
+    choice([
+      operator_comb,
+      number_comb
+    ])
 
   defparsec(
-    :mathdown_filter,
-    mathdown_combinator
+    :mathdown,
+    mathdown_comb
     # integer(min: 1)
     # |> concat(blankspace)
     # |> concat(tempo_filter)
     # |> post_traverse(:build_unit)
-    |> eos()
+    # |> eos()
   )
 
-  def decode(value) do
+  def parse(value) do
     value
     |> String.trim()
-    |> mathdown_filter()
+    |> mathdown()
+    |> case do
+      {:ok, [ast_root], _rest, _context, _line, _offset} ->
+        {:ok, ast_root}
+
+      error ->
+        error
+    end
   end
 
   defp to_number(rest, [arg], ctx, _line, _offset) do
