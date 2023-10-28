@@ -49,6 +49,31 @@ defmodule Exrow.Parser do
 
   number_combinator = choice([float_combinator, integer_combinator])
 
+  operator_combinator = [
+    {:in, ["in", "into", "as", "to"]},
+    {:+, ["+", "plus", "and", "with"]},
+    {:-, ["-", "minus", "subtract", "without"]},
+    {:*, ["*", "times", "multiplied by", "mul"]},
+    {:/, ["/", "divide", "divide by"]},
+    {:^, ["^", "pow"]},
+    {:rem, ["rem", "mod"]},
+    {:and, ["&"]},
+    {:or, ["|"]},
+    {:xor, ["xor"]},
+    {:<<<, ["<<"]},
+    {:>>>, [">>"]},
+  ]
+  |> Enum.map(fn {operator, alternatives} ->
+    alts = ["#{operator}" | alternatives] |> Enum.map(&string(&1)) |> choice()
+    number_combinator
+    |> concat(optional(blankspace))
+    |> ignore(alts)
+    |> concat(optional(blankspace))
+    |> concat(number_combinator)
+    |> tag(operator)
+  end)
+  |> choice()
+
   tempo_filter =
     [
       {:nanosecond, :nanoseconds},
@@ -80,9 +105,15 @@ defmodule Exrow.Parser do
     end)
     |> choice()
 
+  # mathdown_combinator = number_combinator
+  mathdown_combinator = choice([
+    operator_combinator,
+    number_combinator
+  ])
+
   defparsec(
     :mathdown_filter,
-    number_combinator
+    mathdown_combinator
     # integer(min: 1)
     # |> concat(blankspace)
     # |> concat(tempo_filter)

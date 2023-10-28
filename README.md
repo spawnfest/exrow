@@ -54,8 +54,9 @@ A set of operators that perform calculations on bits.
 - [ ] Language and parse
   - [ ] Define the basic language
     - [x] Numbers
-    - [ ] Algebraic Operations
-    - [ ] Bitwise
+    - [x] Operations
+    - [x] Bitwise
+    - [ ] Parentheses
     - [ ] Units
     - [ ] Percentage
     - [ ] Variables

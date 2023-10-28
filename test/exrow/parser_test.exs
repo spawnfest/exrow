@@ -28,15 +28,37 @@ defmodule Exrow.ParserTest do
                Parser.decode("0x1f")
 
       assert {:ok, [%Number{mantissa: 0xFFFFFF, base: :hex, exponent: 0}], _, _, _, _} =
-                Parser.decode("0xFF_FF_FF")
+               Parser.decode("0xFF_FF_FF")
     end
 
     test "float numbers" do
       assert {:ok, [%Number{mantissa: 109, base: :decimal, exponent: -2}], _, _, _, _} =
-        Parser.decode("1.09")
+               Parser.decode("1.09")
 
       assert {:ok, [%Number{mantissa: 1_000_456, base: :decimal, exponent: -3}], _, _, _, _} =
-          Parser.decode("1_000.45_6")
+               Parser.decode("1_000.45_6")
+    end
+
+    test "algebraic operators" do
+      assert {:ok, [{:+, [%Number{mantissa: 1}, %Number{mantissa: 1}]}], _, _, _, _} =
+               Parser.decode("1 + 1")
+
+      assert {:ok, [{:+, [%Number{mantissa: 1}, %Number{mantissa: 1}]}], _, _, _, _} =
+               Parser.decode("1 plus 1")
+
+      assert {:ok, [{:+, [%Number{mantissa: 1}, %Number{mantissa: 1}]}], _, _, _, _} =
+               Parser.decode("1 and 1")
+
+      assert {:ok, [{:+, [%Number{mantissa: 1}, %Number{mantissa: 1}]}], _, _, _, _} =
+               Parser.decode("1 with 1")
+
+      assert {:ok, [{:-, [%Number{mantissa: 1}, %Number{mantissa: 1}]}], _, _, _, _} =
+               Parser.decode("1 - 1")
+
+      assert {:ok, [{:-, [%Number{mantissa: 1}, %Number{mantissa: 1}]}], _, _, _, _} =
+               Parser.decode("1 minus 1")
+
+      # TODO Add options for the another operators
     end
 
     # test "dimension_filter" do
