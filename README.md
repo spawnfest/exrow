@@ -1,0 +1,3 @@
+# ☴ Exrow
+
+Exrow is app that combines the simplicity of note-taking with the robust power of computer language and spreadsheets. Exrow allows users to write math equations and expressions using a markdown-like syntax, providing an intuitive and expressive way to work with mathematical concepts. This innovative tool seamlessly translates human-readable mathematical notations into computational processes, offering the flexibility and ease of note-taking while leveraging the computational abilities of a sophisticated software. Exrow is designed to complement existing spreadsheet software and computer algebra systems, enhancing the way users interact with mathematical concepts without replacing these essential tools.
