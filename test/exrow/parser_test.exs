@@ -38,7 +38,7 @@ defmodule Exrow.ParserTest do
 
     test "parentheses" do
       assert {:ok, {:*, {:*, 2, 1}, {:+, 3, 1}}} =
-        Parser.parse("(2 * 1) (3 + 1)")
+               Parser.parse("(2 * 1) (3 + 1)")
 
       assert {:ok, {:*, {:+, {:*, 2, 1}, 2}, {:+, 3, 1}}} =
                Parser.parse("(2 * 1 + 2)(3 + 1)")
@@ -47,10 +47,19 @@ defmodule Exrow.ParserTest do
                Parser.parse("(1 + 2) + 3 - (4 * 5) / 7")
     end
 
-    # test "parentheses" do
-    #   assert {:ok, {:+, 1},1}]}} =
-    #            Parser.parse("(1 + 1)")
-    # end
+    test "set variable" do
+      assert {:ok, {:=, "result", {:*, {:*, 2, 1}, {:+, 3, 1}}}} =
+               Parser.parse("result = (2 * 1) (3 + 1)")
+
+      assert {:ok, {:=, "more_complex_1", {:binary, 2}}} =
+               Parser.parse("more_complex_1 = 0b10")
+    end
+
+    test "use variables" do
+      assert {:ok, {:+, "va1", 10}} = Parser.parse("va1 + 10")
+      assert {:ok, {:+, "va1", {:*, "va2", "va3"}}} = Parser.parse("va1 + va2 * va3")
+      assert {:ok, {:+, "va1", {:*, "va2", "va3"}}} = Parser.parse("va1 + va2 mul va3")
+    end
 
     # test "dimension_filter" do
     #   assert {:ok, [%Exrow.TimeUnit{value: 10, unit: :nanosecond}], _, _, _, _} =

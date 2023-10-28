@@ -4,19 +4,26 @@ defmodule Exrow.Parser do
   # alias ExRow.Number
   # alias Exrow.Unit
 
-  # term_op  := * | /
+  # space      := ?\s | ?\t
+  # identifier := (?a..?z | ?A..?Z | ?_)[?a..?z, ?A..?Z, ?_, ?0..?9]...
+  # term_op    := * | /
   # expr_op    := in | + | - | ^ | rem | & | \| | xor | << | >>
   # float      := 0.1 | 10_00.50 | ...
   # integer    := 0 | 0b01 | 1_000 | ...
+
   # number     := float | integer
   # factor     := ( expr ) | ( expr ) ( expr ) | number
   # term       := factor term_op term | factor
   # expr       := term expr_op expr | term
 
-  # identifier := not(operator) & not(number)
-  # var        := identifier = expr
+  # assign     := identifier = expr
 
   space = ignore(ascii_string([?\s, ?\t], min: 1))
+
+  identifier =
+    ascii_string([?a..?z, ?A..?Z, ?_], max: 1)
+    |> optional(ascii_string([?a..?z, ?A..?Z, ?_, ?0..?9], min: 1))
+    |> reduce({Enum, :join, [""]})
 
   expr_op =
     [
@@ -90,7 +97,7 @@ defmodule Exrow.Parser do
     end)
     |> choice()
 
-  number = choice([float, integer])
+  number = choice([float, integer, identifier])
 
   factor =
     empty()
@@ -144,7 +151,17 @@ defmodule Exrow.Parser do
 
   defcombinatorp(:term, term)
   defcombinatorp(:expr, expr)
-  defparsec(:mathdown, parsec(:expr))
+
+  assign =
+    identifier
+    |> optional(space)
+    |> ignore(string("="))
+    |> optional(space)
+    |> parsec(:expr)
+    |> tag(:assign)
+    |> post_traverse(:to_assign)
+
+  defparsec(:mathdown, choice([assign, parsec(:expr)]))
 
   def parse(value) do
     value
@@ -157,6 +174,10 @@ defmodule Exrow.Parser do
       error ->
         error
     end
+  end
+
+  defp to_assign(rest, [{:assign, [identifier, expr]}], ctx, _line, _offset) do
+    {rest, [{:=, identifier, expr}], ctx}
   end
 
   defp to_prefixed(rest, [{:factor, [left, right]}], ctx, _line, _offset) do

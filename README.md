@@ -26,6 +26,7 @@ Algebraic operations can be made with sign or word operators. Expressions can be
 10 + 1
 10 times 10
 (10 + 2) * 10
+(10 + 3)(10 * 3) # same as (10 + 3) * (10 * 3)
 ```
 
 |Operation|Sign|Sample|
@@ -52,17 +53,21 @@ A set of operators that perform calculations on bits.
 ## TODO
 
 - [ ] Language and parse
-  - [ ] Define the basic language
+  - [ ] Define the basic language and implement the parse
     - [x] Numbers
     - [x] Operations
     - [x] Bitwise
     - [x] Parentheses
-    - [ ] Variables
+    - [x] Variables
     - [ ] Units
     - [ ] Percentage
-  - [ ] Implement the parse for the basic language
+    - [ ] Formula support
+      - [ ] Starting with =
+    - [ ] Lambda support
   - [ ] Implement a runtime
   - [ ] Document the language
+
+- [ ] Use exrow as a block in livebook?
 
 - [ ] UI
   - [ ] Basic editor
