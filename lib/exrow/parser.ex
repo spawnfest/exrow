@@ -4,19 +4,26 @@ defmodule Exrow.Parser do
   # alias ExRow.Number
   # alias Exrow.Unit
 
-  # space      := ?\s | ?\t
-  # identifier := (?a..?z | ?A..?Z | ?_)[?a..?z, ?A..?Z, ?_, ?0..?9]...
-  # term_op    := * | /
-  # expr_op    := in | + | - | ^ | rem | & | \| | xor | << | >>
-  # float      := 0.1 | 10_00.50 | ...
-  # integer    := 0 | 0b01 | 1_000 | ...
+  # space        := ?\s | ?\t
+  # identifier   := (?a..?z | ?A..?Z | ?_)[?a..?z, ?A..?Z, ?_, ?0..?9]...
+  # term_op      := * | /
+  # expr_op      := in | + | - | ^ | rem | & | \| | xor | << | >>
 
-  # number     := float | integer
-  # factor     := ( expr ) | ( expr ) ( expr ) | number
-  # term       := factor term_op term | factor
-  # expr       := term expr_op expr | term
+  # float        := 0.1 | 10_00.50 | ...
+  # integer      := 0 | 0b01 | 1_000 | ...
+  # number       := float | integer
 
-  # assign     := identifier = expr
+  # length_unit  := kilometer | meter | ...
+  # angular_unit := [TODO]
+  # unit         := length_unit | angular_unit | [TODO]
+  # unit_value   := number unit
+  # value        := unit_value | number | identifier
+
+  # factor       := ( expr ) | ( expr ) ( expr ) | value
+  # term         := factor term_op term | factor
+  # expr         := term expr_op expr | term
+
+  # assign       := identifier = expr
 
   space = ignore(ascii_string([?\s, ?\t], min: 1))
 
@@ -97,7 +104,54 @@ defmodule Exrow.Parser do
     end)
     |> choice()
 
-  number = choice([float, integer, identifier])
+  length_unit =
+    [
+      {:femtometer, "femtometer", -15},
+      {:picometer, "picometer", -12},
+      {:nanometre, "nanometre", -9},
+      {:micrometre, "micrometre", -6},
+      {:millimeter, "millimeter", -3},
+      {:centimeter, "centimeter", -2},
+      {:decimeter, "decimeter", -1},
+      # Base
+      {:meter, "meter", 0},
+      {:dekameter, "dekameter", 1},
+      {:hectometer, "hectometer", 2},
+      {:kilometer, "kilometer", 3},
+      # Variants
+      {:mil, "mil", 0},
+      {:points, "points", 0},
+      {:lines, "lines", 0},
+      {:inch, "inch", 0},
+      {:hand, "hand", 0},
+      {:foot, "foot", 0},
+      {:yard, "yard", 0},
+      {:rod, "rod", 0},
+      {:chain, "chain", 0},
+      {:furlong, "furlong", 0},
+      {:mile, "mile", 0},
+      {:cable, "cable", 0},
+      {:nmi, "nmi", 0},
+      {:nmi, "nautical mile", 0},
+      {:league, "league", 0}
+    ]
+    |> Enum.map(fn {unit, form, _} ->
+      string(form)
+      |> ignore()
+      |> tag(unit)
+    end)
+    |> choice()
+
+  number = choice([float, integer])
+  unit = length_unit
+
+  unit_value =
+    number
+    |> concat(optional(space))
+    |> concat(unit)
+    |> post_traverse(:to_unit)
+
+  value = choice([unit_value, number, identifier])
 
   factor =
     empty()
@@ -109,7 +163,7 @@ defmodule Exrow.Parser do
         |> ignore(ascii_char([?)]))
         |> times(min: 1)
         |> tag(:factor),
-        number
+        value
       ],
       gen_weights: [1, 3]
     )
@@ -176,6 +230,10 @@ defmodule Exrow.Parser do
     end
   end
 
+  defp to_unit(rest, [{unit, _}, value], ctx, _line, _offset) do
+    {rest, [{unit, value}], ctx}
+  end
+
   defp to_assign(rest, [{:assign, [identifier, expr]}], ctx, _line, _offset) do
     {rest, [{:=, identifier, expr}], ctx}
   end
@@ -186,6 +244,10 @@ defmodule Exrow.Parser do
 
   defp to_prefixed(rest, [{:factor, expr}], ctx, _line, _offset) do
     {rest, expr, ctx}
+  end
+
+  defp to_prefixed(rest, [{_, ["", :-, right]}], ctx, _line, _offset) do
+    {rest, [{:-, right}], ctx}
   end
 
   defp to_prefixed(rest, [{_, [left, op, right]}], ctx, _line, _offset) do

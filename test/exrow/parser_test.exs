@@ -20,6 +20,14 @@ defmodule Exrow.ParserTest do
       assert {:ok, {:float, 1_000_456, -3}} = Parser.parse("1_000.45_6")
     end
 
+    test "signal numbers" do
+      assert {:ok, {:-, 1_000_000}} = Parser.parse("-1_000_000")
+      assert {:ok, {:-, {:binary, 0b10_10}}} = Parser.parse("- 0b10_10")
+
+      assert {:ok, {:-, {:float, 109, -2}}} = Parser.parse("-1.09")
+      assert {:ok, {:-, {:float, 1_000_456, -3}}} = Parser.parse("- 1_000.45_6")
+    end
+
     test "algebraic operators" do
       assert {:ok, {:+, 1, {:+, 1, 2}}} = Parser.parse("1 + 1 + 2")
       assert {:ok, {:+, {:hex, 1}, {:hex, 1}}} = Parser.parse("0x1 + 0x1")
@@ -59,6 +67,15 @@ defmodule Exrow.ParserTest do
       assert {:ok, {:+, "va1", 10}} = Parser.parse("va1 + 10")
       assert {:ok, {:+, "va1", {:*, "va2", "va3"}}} = Parser.parse("va1 + va2 * va3")
       assert {:ok, {:+, "va1", {:*, "va2", "va3"}}} = Parser.parse("va1 + va2 mul va3")
+    end
+
+    test "length units" do
+      assert {:ok, {:meter, 10}} = Parser.parse("10 meter")
+      assert {:ok, {:mil, 10}} = Parser.parse("10mil")
+      assert {:ok, {:chain, {:hex, 0xFF}}} = Parser.parse("0xFF chain")
+      assert {:ok, {:inch, {:float, 1005, -2}}} = Parser.parse("10.05 inch")
+
+      assert {:ok, {:+, {:meter, 10}, 2}} = Parser.parse("10 meter + 2")
     end
 
     # test "dimension_filter" do
