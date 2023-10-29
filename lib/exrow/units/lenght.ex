@@ -28,6 +28,7 @@ defmodule Exrow.Length do
     mile: {"mile", 1609.34},
     cable: {"cable", 185.32},
     nmi: {"nmi", 1853.18},
+    # nmi: {"nautical mile", 1853.18},
     league: {"league", 4828.03},
   }
 

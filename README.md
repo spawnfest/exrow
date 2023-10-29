@@ -35,10 +35,11 @@ This project has three parts:
 - `exrow-livebook`: a plugin to use exrow as livebook's block
 - `exrow-app`: A desktop app for multiple OS, package with [burrito] and [tauri]
 
-## Implementation details
+## Technology details
 
-- This project uses [NimbleParsec] to implement a math language parse.
-- This project will use [Phoenix LiveView] and [monaco-editor] to create a interactive experience for users, providing a text editor with syntax highlighting and autocompletion.
+- [NimbleParsec] to implement a math language parse.
+- [Phoenix LiveView] and [monaco-editor] to create a interactive experience for users, providing a text editor with syntax highlighting and autocompletion.
+- `GenServer` and `Task` to handle with async values, for example: to update the currency rates on [open exchange rates] service.
 
 ## Usage
 
@@ -101,6 +102,14 @@ A set of operators that perform calculations on bits.
 |Bitwise Xor|xor|
 |Left Shift|<<|
 |Right Shift|>>|
+
+## Length units
+
+Supported units: meter, mil, points, lines, inch, hand, foot, yard, rod, chain, furlong, mile, cable, nautical mile, league.
+
+## Css units
+
+Supported units: px (pixel), pt (point), inch
 
 ## TODO
 
@@ -166,3 +175,4 @@ A set of operators that perform calculations on bits.
 [mono-editor]: https://microsoft.github.io/monaco-editor/
 [Phoenix LiveView]: https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html
 [CAS]: https://en.wikipedia.org/wiki/Computer_algebra_system
+[open exchange rates]: https://openexchangerates.org/
