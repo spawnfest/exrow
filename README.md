@@ -86,8 +86,9 @@ A set of operators that perform calculations on bits.
   - [ ] Arithmetic
     - [x] Basic operations
     - [ ] All operations
+  - [x] Variables
   - [ ] Unit conversion
-  - [ ] Variables
+  - [ ] Currency
   - [ ] Lambda
 - [ ] Document the language
 

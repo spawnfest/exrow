@@ -20,10 +20,18 @@ defmodule Exrow.Calc do
     end
   end
 
-  def calc_line(line, %{results: results} = ctx) do
+  def calc_line(line, %{vars: vars, results: results} = ctx) do
     case Parser.parse(line) do
+      {:ok, {:=, identify, expr}} ->
+        case dcalc_expr(expr, ctx) do
+          {:error, _} = result ->
+            %{ctx | results: [result | results]}
+          result ->
+            %{ctx | vars: Map.put(vars, identify, result), results: [result | results]}
+        end
+
       {:ok, expr} ->
-        %{ctx | results: [dcalc_expr(expr, ctx) | results]}
+        %{ctx | results: [ dcalc_expr(expr, ctx) | results]}
 
       error ->
         Logger.error("Line parse error", inspect(error))
@@ -47,6 +55,9 @@ defmodule Exrow.Calc do
     calc_expr(expr, ctx)
   end
 
+  # Nothing
+  defp calc_expr("", _ctx), do: nil
+
   # Arithmetic Operators
   @arithmetic_ops [:^, :+, :-, :*, :/]
   defp calc_expr({op, left, right}, _ctx)
@@ -58,8 +69,12 @@ defmodule Exrow.Calc do
     calc_expr({op, dcalc_expr(left, ctx), dcalc_expr(right, ctx)}, ctx)
   end
 
+  # Variables
+  defp calc_expr(identifier, %{ vars: vars }) when is_binary(identifier) do
+    Map.get(vars, identifier, nil)
+  end
+
   # Anything else
-  defp calc_expr("", _ctx), do: nil
   defp calc_expr(expr, _ctx) do
     # Logger.warn("Unsupported expr: #{expr}")
     expr

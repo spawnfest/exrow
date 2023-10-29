@@ -42,13 +42,25 @@ defmodule Exrow.CalcTest do
       assert [1.234] = Calc.calculate("1234 * (10 pow -3)")
       assert [1.234] = Calc.calculate("(10 pow -3) * 1234")
       assert [{:error, "Bad arithmetic: `10 ^ 1.0`"}] = Calc.calculate("10 ^ 1.0")
+    end
 
-      # assert [3] = Calc.calculate("label: 1 + 2")
+    test "using variables" do
+      assert [1] = Calc.calculate("var = 1")
+      assert [1] = Calc.calculate("  var2 = 1")
 
-      # NEXT:
-        # - calculate with float and units
-        # - add more operators
-        # - and variable set and expand
+      assert [1, 2, 3, 0, 3] = Calc.calculate(~s{
+        var1 = 1
+        var2 = var1 + 1
+        var3 = 1 + var2
+        var2 = 0
+        var2 + var3
+      } |> String.trim())
+
+      assert [1, 2, 3] = Calc.calculate(~s{
+        var1 = 1
+        var2 = 2
+        var1 + var2
+      } |> String.trim())
     end
   end
 end
