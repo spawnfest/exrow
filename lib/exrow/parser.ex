@@ -1,6 +1,24 @@
 defmodule Exrow.Parser do
   import NimbleParsec
 
+  @number_kinds [:binary, :octal, :hex]
+  @unit_modules [Exrow.Length, Exrow.Css]
+
+  # {{Length, unit}, value}
+  defguard is_unit(v)
+           when is_tuple(v) and tuple_size(v) == 2 and
+                  is_tuple(elem(v, 0)) and
+                  tuple_size(elem(v, 0)) == 2 and
+                  elem(elem(v, 0), 0) in @unit_modules
+
+  # {kind, value}
+  defguard is_exrow_kind_number(v)
+            when is_tuple(v) and tuple_size(v) == 2 and
+                   elem(v, 0) in @number_kinds and is_number(elem(v, 1))
+
+  # {kind, value} | value
+  defguard is_exrow_number(v) when is_number(v) or is_exrow_kind_number(v) or is_unit(v)
+
   # alias ExRow.Number
   # alias Exrow.Unit
 
@@ -37,7 +55,7 @@ defmodule Exrow.Parser do
       {:in, ["in", "into", "as", "to"]},
       {:+, ["+", "plus", "and", "with"]},
       {:-, ["-", "minus", "subtract", "without"]},
-      {:^, ["^", "pow"]},
+      {:**, ["^", "**", "pow"]},
       {:rem, ["rem", "mod"]},
       {:&, ["&"]},
       {:|, ["|"]},
@@ -123,51 +141,12 @@ defmodule Exrow.Parser do
     end)
     |> choice()
 
-  length_unit =
-    [
-      {:femtometer, "femtometer", -15},
-      {:picometer, "picometer", -12},
-      {:nanometre, "nanometre", -9},
-      {:micrometre, "micrometre", -6},
-      {:millimeter, "millimeter", -3},
-      {:centimeter, "centimeter", -2},
-      {:decimeter, "decimeter", -1},
-      # Base
-      {:meter, "meter", 0},
-      {:dekameter, "dekameter", 1},
-      {:hectometer, "hectometer", 2},
-      {:kilometer, "kilometer", 3},
-      # Variants
-      {:mil, "mil", 0},
-      {:points, "points", 0},
-      {:lines, "lines", 0},
-      {:inch, "inch", 0},
-      {:hand, "hand", 0},
-      {:foot, "foot", 0},
-      {:yard, "yard", 0},
-      {:rod, "rod", 0},
-      {:chain, "chain", 0},
-      {:furlong, "furlong", 0},
-      {:mile, "mile", 0},
-      {:cable, "cable", 0},
-      {:nmi, "nmi", 0},
-      {:nmi, "nautical mile", 0},
-      {:league, "league", 0}
-    ]
-    |> Enum.map(fn {unit, form, _} ->
-      string(form)
-      |> ignore()
-      |> tag(unit)
-    end)
-    |> choice()
-
-  # signal =
-  #   optional(space)
-  #   |> ascii_string([?-, ?+], max: 1)
-  #   |> optional(space)
-
   number = choice([float, integer])
-  unit = length_unit
+  unit =
+    @unit_modules
+    |> Enum.map(&apply(&1, :combinators, []))
+    |> Enum.reduce([], &(&1 ++ &2))
+    |> choice()
 
   unit_value =
     number
