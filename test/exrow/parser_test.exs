@@ -21,14 +21,15 @@ defmodule Exrow.ParserTest do
     end
 
     test "signal numbers" do
-      assert {:ok, {:-, 1_000_000}} = Parser.parse("-1_000_000")
-      assert {:ok, {:-, {:binary, 0b10_10}}} = Parser.parse("- 0b10_10")
+      assert {:ok, -1_000_000} = Parser.parse("-1_000_000")
+      assert {:ok, {:binary, -0b10_10}} = Parser.parse("- 0b10_10")
 
-      assert {:ok, {:-, {:float, 109, -2}}} = Parser.parse("-1.09")
-      assert {:ok, {:-, {:float, 1_000_456, -3}}} = Parser.parse("- 1_000.45_6")
+      assert {:ok, {:float, -109, -2}} = Parser.parse("-1.09")
+      assert {:ok, {:float, -1_000_456, -3}} = Parser.parse("- 1_000.45_6")
     end
 
-    test "algebraic operators" do
+    test "algebraic operators with unsigned" do
+      assert {:ok, {:+, 1, 1}} = Parser.parse("1 + 1")
       assert {:ok, {:+, 1, {:+, 1, 2}}} = Parser.parse("1 + 1 + 2")
       assert {:ok, {:+, {:hex, 1}, {:hex, 1}}} = Parser.parse("0x1 + 0x1")
       assert {:ok, {:+, 1, 1}} = Parser.parse("1 plus 1")
@@ -42,6 +43,31 @@ defmodule Exrow.ParserTest do
       assert {:ok, {:+, 2, {:*, 1, 5}}} = Parser.parse("2 + 1 * 5")
 
       # TODO Add options for the another operators
+    end
+
+    test "algebraic operators with signed" do
+      assert {:ok, {:+, 1, {:-, 1, 2}}} = Parser.parse("1 + 1 - 2")
+      assert {:ok, {:/, 1, -2}} = Parser.parse("1 / -2")
+      assert {:ok, {:*, 1, -2}} = Parser.parse("1 * -2")
+      assert {:ok, {:*, 1, {:*, -1, 2}}} = Parser.parse("1 * -(2)")
+      assert {:ok, {:*, 1, {:*, -1, {:+, 2, 1}}}} = Parser.parse("1 * -(2 + 1)")
+
+      assert {:ok, {:/, 1, 2}} = Parser.parse("1 / +2")
+      assert {:ok, {:*, 1, 2}} = Parser.parse("1 * +2")
+      assert {:ok, {:*, 1, 2}} = Parser.parse("(1 * +2)")
+      assert {:ok, {:*, 1, -2}} = Parser.parse("(1 * -2)")
+      assert {:ok, {:*, 1, 2}} = Parser.parse("1 * +(2)")
+      assert {:ok, {:+, {:*, 1, 1}, 2}} = Parser.parse("1 * 1 + (2)")
+      assert {:ok, {:*, 1, {:+, 2, 1}}} = Parser.parse("1 * +(2 + 1)")
+      assert {:ok, {:*, -1, {:+, {:binary, 1}, 1}}} = Parser.parse("- (0b001 + 1)")
+      assert {:ok, {:*, 2, {:*, -1, {:+, {:binary, 1}, 1}}}} = Parser.parse("2 * - (0b001 + 1)")
+
+      assert {:ok, {:/, -1, -2}} = Parser.parse("-1 / -2")
+      assert {:ok, {:/, 1, -2}} = Parser.parse("+1 / -2")
+      assert {:ok, {:*, -1, 2}} = Parser.parse("(-1) * +2")
+      assert {:ok, {:*, -1, 2}} = Parser.parse("-1 * +2")
+      assert {:ok, {:*, 1, 2}} = Parser.parse("1 * +(2)")
+      assert {:ok, {:*, 1, {:+, 2, 1}}} = Parser.parse("1 * +(2 + 1)")
     end
 
     test "parentheses" do

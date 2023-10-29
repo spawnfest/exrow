@@ -39,28 +39,36 @@ defmodule Exrow.Parser do
       {:-, ["-", "minus", "subtract", "without"]},
       {:^, ["^", "pow"]},
       {:rem, ["rem", "mod"]},
-      {:and, ["&"]},
-      {:or, ["|"]},
+      {:&, ["&"]},
+      {:|, ["|"]},
       {:xor, ["xor"]},
       {:<<<, ["<<"]},
       {:>>>, [">>"]}
     ]
     |> Enum.map(fn {symbol, alternatives} ->
-      ["#{symbol}" | alternatives]
+      alternatives
       |> Enum.map(&string(&1))
-      |> choice()
+      |> case do
+        [opt] -> opt
+        opts -> choice(opts)
+      end
       |> replace(symbol)
     end)
 
   term_op =
     [
+      # {:+, ["+"]},
+      # {:-, ["-"]},
       {:*, ["*", "times", "multiplied by", "mul"]},
-      {:/, ["/", "divide", "divide by"]}
+      {:/, ["/", "divide by", "divide"]}
     ]
     |> Enum.map(fn {symbol, alternatives} ->
-      ["#{symbol}" | alternatives]
+      alternatives
       |> Enum.map(&string(&1))
-      |> choice()
+      |> case do
+        [opt] -> opt
+        opts -> choice(opts)
+      end
       |> replace(symbol)
     end)
 
@@ -74,8 +82,17 @@ defmodule Exrow.Parser do
       |> reduce({Enum, :join, [""]})
     )
 
+  signal =
+    choice([
+      ascii_string([?-], max: 1),
+      ignore(ascii_string([?+], max: 1))
+    ])
+    |> optional()
+
   float =
-    ascii_string([?0..?9], min: 1)
+    signal
+    |> optional(space)
+    |> ascii_string([?0..?9], min: 1)
     |> concat(optional_separator)
     |> reduce({Enum, :join, [""]})
     |> ignore(string("."))
@@ -91,7 +108,9 @@ defmodule Exrow.Parser do
       {:decimal, empty(), ascii_string([?0..?9], min: 1)}
     ]
     |> Enum.map(fn {system, prefix, numbers} ->
-      prefix
+      signal
+      |> optional(space)
+      |> concat(prefix)
       |> concat(numbers)
       |> optional(
         numbers_separator
@@ -141,6 +160,11 @@ defmodule Exrow.Parser do
       |> tag(unit)
     end)
     |> choice()
+
+  # signal =
+  #   optional(space)
+  #   |> ascii_string([?-, ?+], max: 1)
+  #   |> optional(space)
 
   number = choice([float, integer])
   unit = length_unit
@@ -246,8 +270,22 @@ defmodule Exrow.Parser do
     {rest, expr, ctx}
   end
 
-  defp to_prefixed(rest, [{_, ["", :-, right]}], ctx, _line, _offset) do
-    {rest, [{:-, right}], ctx}
+  defp to_prefixed(rest, [{:expr, [{op, left, ""}, :-, right]}], ctx, _line, _offset)
+       when op in [:*, :/] do
+    {rest, [{op, left, {:*, -1, right}}], ctx}
+  end
+
+  defp to_prefixed(rest, [{:expr, [{op, left, ""}, :+, right]}], ctx, _line, _offset)
+       when op in [:*, :/] do
+    {rest, [{op, left, right}], ctx}
+  end
+
+  defp to_prefixed(rest, [{:expr, ["", :-, exp]}], ctx, _line, _offset) do
+    {rest, [{:*, -1, exp}], ctx}
+  end
+
+  defp to_prefixed(rest, [{:expr, ["", :+, exp]}], ctx, _line, _offset) do
+    {rest, [exp], ctx}
   end
 
   defp to_prefixed(rest, [{_, [left, op, right]}], ctx, _line, _offset) do
