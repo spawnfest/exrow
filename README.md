@@ -1,14 +1,64 @@
-# ☴ Exrow
+<div align="center">
+  <p>
+    <a align="center" href="" target="_blank">
+      <img width="100%" src="https://github.com/spawnfest/exrow/blob/main/priv/logo.png?raw=true">
+    </a>
+  </p>
+</div>
 
-Exrow is an app that combines the simplicity of note-taking with the robust power of computer language and spreadsheets. Exrow allows users to write math equations and expressions using a markdown-like syntax, providing an intuitive and expressive way to work with mathematical concepts.
+An elixir library/livebook plugin/app that combines the simplicity of note-taking with the robust power of computer language and spreadsheet concepts. Exrow allows users to write math equations and expressions using a markdown-like syntax, providing an intuitive and expressive way to work with mathematical concepts.
+
+*Obs:* This project doesn't want to be a complete [CAS] but a calculator with steroids.
+
+## Status
+
+This project is in the early stages, so there's little to see. For now, you can download the source and run the tests:
+
+```bash
+$ mix deps.get
+$ mix test
+```
+
+A basic version of the parse and runtime are ready, so a calculation can be done by calling it from the `iex`:
+
+```elixir
+$ iex -S mix
+iex(1)> Exrow.Runtime.calculate("var = 1234 * (10 pow -3)\nvar + 2")
+[1.234, 3.234]
+```
+
+## Packages
+
+This project has three parts:
+
+- `exrow-core`: parser and runtime library
+- `exrow-livebook`: a plugin to use exrow as livebook's block
+- `exrow-app`: A desktop app for multiple OS, package with [burrito] and [tauri]
+
+## Implementation details
+
+- This project uses [NimbleParsec] to implement a math language parse.
+- This project will use [Phoenix LiveView] and [monaco-editor] to create a interactive experience for users, providing a text editor with syntax highlighting and autocompletion.
 
 ## Usage
+
+The basis of `☴ Exrow` is: write one math expression by line, for every valid math expression, a result will show up on the right side of the editor:
+
+```
+## An example
+price_hour = $100                                                      = $ 100
+hours_worked = 72                                                      = 72
+price_hour * hours_worked                                              = $ 7200
+_ in EUR                                                               = € 7200
+```
+
+Invalid lines will be ignored, so you can use them as notes or comments.
 
 ### Numbers
 
 You can express numbers in decimal `10` or `12.34`, binary `0b00`, octal `0o23478` or hexadecimal `0xFF`. Long numbers can be written with `_` in the middle to make it more transparent, like `1_000_000_000` (the character `_` will be ignored).
 
-*Nerd info:* exrow is strongly inspired the [Elixir](https://elixir-lang.org/getting-started/basic-types.html#basic-arithmetic) arithmetic, so numbers are represented in the same way.
+*Nerd info:* exrow is strongly inspired by [Elixir](https://elixir-lang.org/getting-started/basic-types.html#basic-arithmetic) arithmetic, so numbers are represented similarly.
 
 ### Units
 
@@ -54,7 +104,7 @@ A set of operators that perform calculations on bits.
 
 ## TODO
 
-- [ ] Define the basic language and implement the parse
+- [ ] Define the language and implement the parse
   - [x] Numbers
     - [x] Negative numbers
   - [x] Operations
@@ -65,7 +115,7 @@ A set of operators that perform calculations on bits.
   - [ ] Units
     - [ ] Angular
     - [ ] Area
-    - [ ] CSS
+    - [x] CSS
     - [ ] Currency
     - [ ] Data
     - [ ] Date and Time
@@ -78,21 +128,25 @@ A set of operators that perform calculations on bits.
   - [ ] Function call `sum(10, 2) | (sum 10, 2) + 3`
   - [ ] Percentage
   - [ ] Formula support
-    - [ ] Starting with =
+    - [ ] Starting with =?
   - [ ] Lambda support
-  - [ ] Array and matrix
+  - [ ] Array, rages and matrix
     - [ ] Matrix operations
 - [ ] Implement a runtime
   - [ ] Arithmetic
     - [x] Basic operations
     - [ ] All operations
   - [x] Variables
-  - [ ] Unit conversion
+  - [ ] Units
+    - [ ] Adjust precision
+    - [ ] Length
+    - [-] Css
   - [ ] Currency
   - [ ] Lambda
-- [ ] Document the language
 
-- [ ] Use exrow as a block in livebook?
+- [ ] Livebook plugin
+  - [ ] Split the project into package
+  - [ ] Understand how to implement a livebook plugin
 
 - [ ] UI
   - [ ] Basic Editor
@@ -103,4 +157,12 @@ A set of operators that perform calculations on bits.
 
 - [ ] Documentation
   - [ ] Improve the readme
+  - [ ] Document language usage
   - [ ] Apply logo and colours
+
+[burrito]: https://github.com/burrito-elixir/burrito
+[tauri]: https://github.com/filipecabaco/ex_tauri
+[NimbleParsec]: https://hexdocs.pm/nimble_parsec/NimbleParsec.html
+[mono-editor]: https://microsoft.github.io/monaco-editor/
+[Phoenix LiveView]: https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html
+[CAS]: https://en.wikipedia.org/wiki/Computer_algebra_system
