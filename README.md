@@ -61,6 +61,7 @@ A set of operators that perform calculations on bits.
   - [x] Bitwise
   - [x] Parentheses
   - [x] Variables
+  - [ ] Labels
   - [ ] Units
     - [ ] Angular
     - [ ] Area
@@ -83,6 +84,8 @@ A set of operators that perform calculations on bits.
     - [ ] Matrix operations
 - [ ] Implement a runtime
   - [ ] Arithmetic
+    - [x] Basic operations
+    - [ ] All operations
   - [ ] Unit conversion
   - [ ] Variables
   - [ ] Lambda

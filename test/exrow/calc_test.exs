@@ -11,7 +11,7 @@ defmodule Exrow.CalcTest do
     end
 
     test "arithmetic with integers" do
-      # assert [-1] = Calc.calculate("-1")
+      assert [-1] = Calc.calculate("-1")
       assert [-2] = Calc.calculate("- (0b001 + 1)")
       assert [1] = Calc.calculate("-1 + 2")
       assert [{:binary, -0b01}] = Calc.calculate("-0b001")
@@ -32,15 +32,16 @@ defmodule Exrow.CalcTest do
     end
 
     test "arithmetics with floats" do
-      assert [{:float, -11, -1}] = Calc.calculate("-1.1")
-      assert [{:float, 24, -1}] = Calc.calculate("1.1 + 1.3")
-      assert [{:float, 2445, -3}] = Calc.calculate("1.1 + 1.345")
+      assert [-1.1] = Calc.calculate("-1.1")
+      assert [3.3] = Calc.calculate("2. + 1.3")
+      assert [2.4000000000000004] = Calc.calculate("1.1 + 1.3")
+      assert [2.4450000000000003] = Calc.calculate("1.1 + 1.345")
+      assert [0.19999999999999996] = Calc.calculate("-1.1 + 1.3")
+      assert [-2.4000000000000004] = Calc.calculate("-1.1 - 1.3")
 
-      # assert [{:float, 2, -1}] = Calc.calculate("-1.1 + 1.3")
-      # assert [{:float, 2, -1}] = Calc.calculate("2. + 1.3")
-      # assert [{:float, -24, -1}] = Calc.calculate("-1.1 - 1.3")
-      # assert [{:float, 1234, -3}] = Calc.calculate("1234 * (10 pow -3)")
-      # assert [{:float, 1234, -3}] = Calc.calculate("(10 pow -3) * 1234")
+      assert [1.234] = Calc.calculate("1234 * (10 pow -3)")
+      assert [1.234] = Calc.calculate("(10 pow -3) * 1234")
+      assert [{:error, "Bad arithmetic: `10 ^ 1.0`"}] = Calc.calculate("10 ^ 1.0")
 
       # assert [3] = Calc.calculate("label: 1 + 2")
 

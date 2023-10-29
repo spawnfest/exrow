@@ -51,7 +51,7 @@ defmodule Exrow.MixProject do
       {:nimble_parsec, "~> 1.3"},
 
       # Test utils
-      {:maxo_test_iex, "~> 0.1.6", only: [:dev, :test]},
+      {:maxo_test_iex, "~> 0.1.6", only: [:dev, :test]}
     ]
   end
 

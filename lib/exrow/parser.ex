@@ -94,10 +94,10 @@ defmodule Exrow.Parser do
     |> optional(space)
     |> ascii_string([?0..?9], min: 1)
     |> concat(optional_separator)
-    |> reduce({Enum, :join, [""]})
-    |> ignore(string("."))
+    |> string(".")
     |> concat(optional_separator)
-    |> tag(:float)
+    |> reduce({Enum, :join, [""]})
+    |> unwrap_and_tag(:float)
     |> post_traverse(:to_number)
 
   integer =
@@ -296,10 +296,8 @@ defmodule Exrow.Parser do
     {rest, args, ctx}
   end
 
-  defp to_number(rest, [{:float, [mantissa, exponent]}], ctx, _line, _offset) do
-    mantissa = safe_parse_int("#{mantissa}#{exponent}")
-    exponent = -String.length(exponent)
-    {rest, [{:float, mantissa, exponent}], ctx}
+  defp to_number(rest, [{:float, value}], ctx, _line, _offset) do
+    {rest, [safe_parse_float(value)], ctx}
   end
 
   defp to_number(rest, [{:decimal, value}], ctx, _line, _offset) do
@@ -308,6 +306,13 @@ defmodule Exrow.Parser do
 
   defp to_number(rest, [{base, value}], ctx, _line, _offset) do
     {rest, [{base, safe_parse_int(value, base)}], ctx}
+  end
+
+  defp safe_parse_float(value) do
+    case Float.parse(value) do
+      {value, _} -> value
+      _ -> 0
+    end
   end
 
   defp safe_parse_int(value, base \\ 10)

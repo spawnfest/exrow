@@ -16,16 +16,16 @@ defmodule Exrow.ParserTest do
     end
 
     test "float numbers" do
-      assert {:ok, {:float, 109, -2}} = Parser.parse("1.09")
-      assert {:ok, {:float, 1_000_456, -3}} = Parser.parse("1_000.45_6")
+      assert {:ok, 1.09} = Parser.parse("1.09")
+      assert {:ok, 1_000.45_6} = Parser.parse("1_000.45_6")
     end
 
     test "signal numbers" do
       assert {:ok, -1_000_000} = Parser.parse("-1_000_000")
       assert {:ok, {:binary, -0b10_10}} = Parser.parse("- 0b10_10")
 
-      assert {:ok, {:float, -109, -2}} = Parser.parse("-1.09")
-      assert {:ok, {:float, -1_000_456, -3}} = Parser.parse("- 1_000.45_6")
+      assert {:ok, -1.09} = Parser.parse("-1.09")
+      assert {:ok, -1_000.456} = Parser.parse("- 1_000.45_6")
     end
 
     test "algebraic operators with unsigned" do
@@ -99,7 +99,7 @@ defmodule Exrow.ParserTest do
       assert {:ok, {:meter, 10}} = Parser.parse("10 meter")
       assert {:ok, {:mil, 10}} = Parser.parse("10mil")
       assert {:ok, {:chain, {:hex, 0xFF}}} = Parser.parse("0xFF chain")
-      assert {:ok, {:inch, {:float, 1005, -2}}} = Parser.parse("10.05 inch")
+      assert {:ok, {:inch, 10.05}} = Parser.parse("10.05 inch")
 
       assert {:ok, {:+, {:meter, 10}, 2}} = Parser.parse("10 meter + 2")
     end
